@@ -34,6 +34,7 @@ function circleDraw() {
   var ctx = cvs.getContext('2d');
 
   // 線のみ
+  // context.arc(x, y, radius(半径), startAngle(開始角度), endAngle(終了角度), counterclockwise(反時計回りにするかしないか))
   ctx.beginPath();
   ctx.arc(50, 50, 50, 0, Math.PI*2, true);
   ctx.stroke();
@@ -83,4 +84,28 @@ function lineDraw() {
   ctx.moveTo(350, 0);
   ctx.lineTo(350, 100);
   ctx.stroke();
+}
+
+// ---------- p5.js ---------- //
+// p5.jsで毎回描くことになる定型的な部分
+//最初に一回だけ実行する
+function setup() {
+  createCanvas(400, 400); // createCanvas(width, height);
+  background(0);     // https://p5js.org/reference/#/p5/background
+}
+
+function draw() {
+  // ★枠線の描画
+  fill(255, 255, 255);        //塗りつぶしの色を指定（白）
+  rect(0, 0, width, height);  //canvasの左上、座標(0,0)からcanvasのサイズに沿って四角形を描画
+  translate(width/2, height/2); //座標を移動。ここでは（200, 200）に移動・枠線内中央
+
+  // ★半円を二つ描画して一つの円にする
+  fill(0, 0, 255);            //塗りつぶし（青）
+  // p5.jsでのarcは引数の指定が違うので注意
+  // arc(x, y, width, height, startAngle, endAngle, [mode](描画モード));
+  // 角度の指定は度数(0～360°)ではなく、ラジアン(0～2π)
+  arc(0, 0, 100, 100, 0, 4);
+  fill(255, 0, 0);            //塗りつぶし（赤）
+  arc(0, 0, 100, 100, Math.PI, 0);
 }
