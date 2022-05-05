@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+}
+
+
+.itemWrapper {
+    margin-left: 100px;
+    /* border: 1px solid #000; */
+}
+
+.number {
+    text-align: right;
+}
+
+.color-indicator {
+    width: 10px;
+    height: 10px;
+    background-color: #000000;
+}
+
+#result{
+    display: block;
+    font-size: 40px;
+    font-weight: bold;
+}

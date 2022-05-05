@@ -32,7 +32,7 @@ var ratioSum = 0;
 const COLOR_ADJ = 0.4;
 
 // ★ルーレット描画に使用する定数（半径）
-const RADIUS = 250;
+const RADIUS = 100;
 
 
 const TRIANGLE_SIZE = 10;
@@ -56,7 +56,6 @@ function setup() {
     fill(0, 0, 0);
     background(255, 255, 255);
     recalculate();
-    renumbering();
     dataFetch();
 }
 
@@ -137,11 +136,12 @@ function validation() {
         }
     });
     if(badflag){
-        alert('項目名と割合を正しく設定してください。');
+        alert('項目名と割合を正しく設定してください');
         return 1;
     }
     return 0;
 }
+
 // 入力フォーム内容の取得
 function dataFetch() {
     // 各項目の割合を取得
@@ -196,13 +196,13 @@ function cssColorSet() {
     });
 }
 
-function drawRoulette(){
+function drawRoulette() {
     var angleSum = 0.0;
     push();
     colorMode(HSL, 255);
-    for(var i=0;i<len;i++){
-        fill(colorList[i],255-COLOR_ADJ*colorList[i],128);
-        arc(0,0,RADIUS*2,RADIUS*2,angleSum,angleSum+2*PI*probabilityList[i]);
+    for(var i = 0; i < len; i++){
+        fill(colorList[i], 255-COLOR_ADJ*colorList[i], 128);
+        arc(0, 0, RADIUS*2, RADIUS*2, angleSum, angleSum+2*PI*probabilityList[i]);
         angleSum += probabilityList[i]*2*PI;
     }
     pop();
@@ -229,10 +229,9 @@ function recalculate(){
 
 // 項目の追加
 $('.add').click(function() {
-    var add = '<tr class="item"><td class="number"></td><td><div class="color-indicator"></div></td><td><input type="text" class="name" value="項目"></td><td><input type="number" class="ratio" value="1"></td><td class="probability"></td><td><button type="button" onclick="rmItem(this)">削除</button></td></tr>';
+    var add = '<tr class="item"><td><div class="color-indicator"></div></td><td><input type="text" class="name" value="項目"></td><td><input type="number" class="ratio" value="1"></td><td class="probability"></td><td><button type="button" onclick="rmItem(this)">削除</button></td></tr>'
     $('#table').append(add);
     recalculate();
-    renumbering();
     if(mode==Mode.waiting){
         dataFetch();
     }
@@ -243,7 +242,6 @@ function rmItem(e){
     if($('.ratio').length>2){
         $(e).parent().parent().remove();
         recalculate();
-        renumbering();
     }
     if(mode==Mode.waiting){
         dataFetch();
@@ -253,7 +251,6 @@ function rmItem(e){
 // 項目の追加・削除を検知して確率を再計算する
 $('#table').on('change', '.ratio', function() {
     recalculate();
-    renumbering();
     if(mode==Mode.waiting){
         dataFetch();
     }
@@ -291,51 +288,4 @@ function reset(){
     }
     $('#result').html('????');
     resultDisplayed = false;
-}
-
-
-//
-var num = 0;
-
-// アイテムセット
-$('.item-num').on('change', function(){
-    num = $(this).val()-0;
-    $('.item-num').val(num);
-});
-
-function itemSet() {
-    if(!(num == len)){
-        // 設定したい項目数を取得
-        num = $('.item-num').val()-0;
-        // 現在の項目数を取得
-        len = nameList.length;
-        if (num > len){
-            var addItemNum = num - len;
-            for(var i=0; i < addItemNum; i++){
-                console.log('s')
-                var add = '<tr class="item"><td class="number"></td><td><div class="color-indicator"></div></td><td><input type="text" class="name" value="項目"></td><td><input type="number" class="ratio" value="1"></td><td class="probability"></td><td><button type="button" onclick="rmItem(this)">削除</button></td></tr>';
-                $('#table').append(add);
-            }
-        }else{      // len > num
-            var rmItemNum = len - num;
-            for(var i=0; i < rmItemNum; i++){
-                // $('#table').children("item").last().remove();
-                var str = $('.item').last().remove();
-                console.log(i);
-            }
-        }
-        recalculate();
-        renumbering();
-        if(mode==Mode.waiting){
-            dataFetch();
-        }
-    }
-}
-
-function renumbering() {
-    var i = 1;
-    $(".item").each(function(){
-        $(this).children(".number").first().html(i);
-        i++;
-    });
 }

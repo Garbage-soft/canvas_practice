@@ -19,6 +19,8 @@ var mode = Mode.waiting;
 
 const RADIUS = 100;
 
+
+
 // ----- switch文で使用する定数・変数 ----- //
 
 const ACCEL = 0.01; //加速時の加速度
@@ -37,12 +39,64 @@ var resultDisplayed = false;
 const TRIANGLE_SIZE = 10;
 const MARGIN = 10;
 
-function setup() {
-    createCanvas(600, 600);
+
+function getRandomInt(min, max) {
+    return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+function dataFetch(){
+    var ratioSum = 0.0;
+    $('.item').each(function(){
+        var ratio = $(this).find('.ratio').val()-0;
+        ratioSum += ratio;
+    });
+    nameList = [];
+    probabilityList = [];
+    $('.item').each(function(){
+        var name = $(this).find('.name').val();
+        var ratio = $(this).find('.ratio').val()-0;
+        nameList.push(name);
+        probabilityList.push(ratio/ratioSum);
+    });
+    var colors = [];
+    len = nameList.length;
+    for(var i=0;i<len;i++){
+        colors.push(Math.floor(255/len*i));
+    }
+    colorList = [];
+    if(len%2==0){
+        for(var i=0;i<len;i+=2){
+            colorList[i] = colors[Math.floor(i/2)];
+        }
+        for(var i=1;i<len;i+=2){
+            colorList[i] = colors[Math.floor(i/2 + len/2)];
+        }
+    }else{
+        for(var i=0;i<len;i+=2){
+            colorList[i] = colors[Math.floor(i/2)];
+        }
+        for(var i=1;i<len;i+=2){
+            colorList[i] = colors[Math.floor(i/2)+Math.floor(len/2)+1];
+        }
+    }
+    // cssColorSet();//後述
+}
+
+function setup(){
+    var canvas = createCanvas(600,400);
+    canvas.parent('canvas');
+    textSize(20);
+    stroke(0,0,0);
+    fill(0,0,0);
+    background(255,255,255);
+    recalculate();
+    dataFetch();
 }
 
 function draw() {
-    translate(width/2, height/2);   // 座標をCanvasの中心地点に移動
+    fill(255,255,255);
+    rect(0,0,width,height);
+    translate(width/2, height/2);
 
     fill(255,0,0);
     push();
@@ -91,34 +145,78 @@ function draw() {
 }
 
 function drawRoullet() {
-    fill(255, 0, 0);
-    arc(0, 0, 200, 200, 0, PI/2);
-    fill(0, 0, 255);
-    arc(0, 0, 200, 200, PI/2, PI);
-    fill(0, 128, 0);
-    arc(0, 0, 200, 200, PI, PI*3/2);
-    fill(255, 255, 0);
-    arc(0, 0, 200, 200, PI*3/2, TWO_PI);
+    var angleSum = 0.0;
+    push();
+    colorMode(HSL, 255);
+    for(var i=0;i<len;i++){
+        fill(colorList[i],255-COLOR_ADJ*colorList[i],128);
+        arc(0,0,RADIUS*2,RADIUS*2,angleSum,angleSum+2*PI*probabilityList[i]);
+        angleSum += probabilityList[i]*2*PI;
+    }
+    pop();
 }
 
-function getRandomInt(min, max) {
-    return min + Math.floor(Math.random() * (max - min + 1));
+function validation(){
+    var badflag = false;
+    $('.name').each(function(){
+        if($(this).val()==""){
+            badflag = true;
+        }
+    });
+    $('.ratio').each(function(){
+        if(!($(this).val()>0)){
+            badflag = true;
+        }
+    });
+    if(badflag){
+        alert('項目名と割合を正しく設定してください。');
+        return 1;
+    }
+    return 0;
 }
 
-// function vartiacalText(t, x, y) {
-//     push();
-//     fill(255, 255, 255);
-//     textAlign(CENTER, CENTER);
-//     const vt = t.split('').join('\n');
-//     text(vt, x, y);
-//     pop();
-// }
-
-function start() {
-    mode = Mode.acceleration;
-    console.log(mode + 'start')
+function cssColorSet(){
+    var counter = 0;
+    $('.color-indicator').each(function(){
+        push();
+        colorMode(HSL, 255);
+        var c = color(colorList[counter],255-COLOR_ADJ*colorList[counter],128);
+        pop();
+        $(this).css('background-color', "rgb("+c._getRed()+","+c._getGreen()+","+c._getBlue()+")");
+        counter++;
+    });
 }
 
-function stop() {
-    mode = Mode.deceleration;
+function start(){
+    if(mode==Mode.waiting){
+        if(validation()==1){
+            return;
+        }
+        $('#stop').css('display', 'inline-block');
+        $('#start').css('display', 'none');
+        dataFetch();
+        mode = Mode.acceleration;
+    }
+}
+
+function stop(){
+    if(//mode==Mode.acceleration || //加速中でもストップボタンを効かせるにはコメントアウトを解除
+        mode==Mode.constant){
+        $('#start').css('display', 'none');
+        $('#stop').css('display', 'none');
+        mode = Mode.deceleration;
+    }
+}
+
+function reset(){
+    $('#start').css('display', 'inline-block');
+    $('#stop').css('display', 'none');
+    theta = 0.0;
+    speed = 0.0;
+    mode = Mode.waiting;
+    if(validation()==0){
+        dataFetch();
+    }
+    $('#result').html('????');
+    resultDisplayed = false;
 }
